@@ -1,0 +1,12 @@
+
+*~
+*#
+.#*
+*.orig
+*.py[co]
+*.thumbnails*
+
+/demo-venv
+/demo/bin
+/demo/parts
+/demo/develop-eggs
