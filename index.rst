@@ -343,14 +343,14 @@ Our buildbot commits and pushes iff the tests pass.
 Thank you !
 ===========
 
-* Presentation made with Gawel's impress.js Sphinx integration:
+* Presentation made with Gawel's integration of impress.js in Sphinx:
   http://gawel.github.io/impress/
 
-Authors: C Combelles, G. Racinet
+* Authors: C Combelles, G. Racinet
 
-External contributors:
+* External contributors:
 
- * L. Mignon, S. Bidoul (Acsone)
- * S. Rinjhart (Therp)
- * Y. Vaucher, G. Baconnier (Camp2camp)
- * L. Pistone, J.-E. Baudoux (Bcim)
+  * L. Mignon, S. Bidoul (Acsone)
+  * S. Rinjhart (Therp)
+  * Y. Vaucher, G. Baconnier (Camp2camp)
+  * L. Pistone, J.-E. Baudoux (Bcim)
