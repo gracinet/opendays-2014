@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Managing a complex Odoo integration with buildout</title>
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="stylesheet" href="static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="static/impress.css" type="text/css" />
+    <link rel="stylesheet" href="static/custom.css" type="text/css" />
+  </head>
+  <body>
+    <div id="impress">
+      
+  <div class="step first slide section" data-scale="5" id="managing-a-complex-odoo-integration-with-buildout">
+<h1>Managing a complex Odoo integration with buildout<a class="headerlink" href="#managing-a-complex-odoo-integration-with-buildout" title="Permalink to this headline">¶</a></h1>
+<p>A configuration-based project assembly tool</p>
+<ol class="upperalpha simple" start="7">
+<li>Racinet, lead developer</li>
+</ol>
+<p>Talk on <a class="reference external" href="https://github.com/gracinet/opendays-2014">https://github.com/gracinet/opendays-2014</a></p>
+</div>
+<div class="step slide section" data-x="1000" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Started three years ago (OpenERP 6)</li>
+<li>Homepage: <a class="reference external" href="http://pypi.python.org/pypi/anybox.recipe.openerp">http://pypi.python.org/pypi/anybox.recipe.openerp</a></li>
+<li>Documentation for all versions: <a class="reference external" href="http://docs.anybox.fr/anybox.recipe.openerp">http://docs.anybox.fr/anybox.recipe.openerp</a></li>
+<li>Active community</li>
+<li>Good quality: unit and integration tests, continuous integration,
+static analysis (pep8, pyflakes)</li>
+<li>Developer documentation</li>
+</ul>
+</div>
+<div class="step slide section" data-x="2000" id="plan-of-the-talk">
+<h1>Plan of the talk<a class="headerlink" href="#plan-of-the-talk" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic simple">
+<li>Motivation: integrator challenges</li>
+<li>Quick tour and demos</li>
+<li>Advanced features</li>
+</ol>
+</div>
+<div class="step slide section" data-x="3000" id="part-1-3-integrator-challenges">
+<h1>Part 1/3: integrator challenges<a class="headerlink" href="#part-1-3-integrator-challenges" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="step slide section" data-x="4000" id="challenge-dependencies">
+<h1>Challenge: dependencies<a class="headerlink" href="#challenge-dependencies" title="Permalink to this headline">¶</a></h1>
+<p>In a big project, one may need</p>
+<ul class="simple">
+<li>several specific modules :<ul>
+<li>community addons (e.g, from OCA)</li>
+<li>in-house mutualized modules (e.g, anybox_download_package)</li>
+<li>final customer module(s)</li>
+</ul>
+</li>
+<li>external Python libraries<ul>
+<li>interconnection (prestapyt, SOAPPy)</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="step slide section" data-x="5000" id="more-on-dependencies">
+<h1>more on dependencies<a class="headerlink" href="#more-on-dependencies" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>specific versions of usual libraries (lxml, psycopg2…).
+Motivations:<ul>
+<li>bugfix</li>
+<li>recent features (JSON for pyscopg2 &gt;= 2.5)</li>
+</ul>
+</li>
+<li>components from outside of the Odoo world, or even Python !</li>
+</ul>
+</div>
+<div class="step slide section" data-x="6000" id="challenge-configuration-handling">
+<h1>Challenge: configuration handling<a class="headerlink" href="#challenge-configuration-handling" title="Permalink to this headline">¶</a></h1>
+<p>What <strong>is</strong> configuration anyway ?</p>
+<ul class="simple">
+<li>configuration is a relative concept</li>
+<li>needs to be split, e.g, shared vs local</li>
+</ul>
+</div>
+<div class="step slide section" data-x="7000" id="transversal-challenges">
+<h1>Transversal challenges<a class="headerlink" href="#transversal-challenges" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>controlling versions for everything</li>
+<li>reliable reproduction</li>
+<li>uniformity<ul>
+<li>across our projects</li>
+<li>across OpenERP versions</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="step slide section" data-x="8000" id="how-much-time-wasted">
+<h1>How much time wasted ?<a class="headerlink" href="#how-much-time-wasted" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Involving a new developer<ul>
+<li>regular one</li>
+<li>punctual help, escalation</li>
+</ul>
+</li>
+<li>Because of imprecise reproduction<ul>
+<li>test &gt; staging &gt; production</li>
+<li>bug reproduction</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="step slide section" data-x="9000" id="part-2-3-buildout-tour">
+<h1>Part 2/3: buildout tour<a class="headerlink" href="#part-2-3-buildout-tour" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="step slide section" data-x="10000" id="zc-buildout">
+<h1>zc.buildout<a class="headerlink" href="#zc-buildout" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>designed from the ground up with all of these expectations for a
+world as rich and complex as OpenERP/Odoo</li>
+<li>very mature, lots of features (extensions and recipes)</li>
+<li>very generic design, can install anything, but</li>
+<li>natural bias towards python distributions</li>
+<li>There is a whole Linux distribution based on buildout: <em>SlapOS</em></li>
+</ul>
+</div>
+<div class="step slide section" data-x="11000" id="simple-configuration-file">
+<h1>Simple configuration file<a class="headerlink" href="#simple-configuration-file" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">parts</span> <span class="o">=</span> <span class="s">my_project</span>
+
+<span class="k">[my_project]</span>
+<span class="na">recipe</span> <span class="o">=</span> <span class="s">anybox.recipe.openerp[bzr]:server</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">nightly 7.0 20140424-231225     ; could also be &#39;latest&#39;</span>
+<span class="na">addons</span> <span class="o">=</span> <span class="s">local my_project_addons/</span>
+<span class="s">  bzr lp:server-env-tools last:1     ; live revision</span>
+<span class="s">  hg https://rhode.anybox.fr/anybox_addons anybox_addons 1.2    ; a tag</span>
+<span class="s">  git http://github.com/0k/web_m2o_enhanced web_m2o_enhanced aa74142cee</span>
+
+<span class="na">options.load_language</span> <span class="o">=</span> <span class="s">fr_FR</span>
+<span class="na">options.language</span> <span class="o">=</span> <span class="s">fr_FR</span>
+
+<span class="k">[static-analysis]</span>
+<span class="na">recipe</span> <span class="o">=</span> <span class="s">zc.recipe.egg</span>
+<span class="na">eggs</span> <span class="o">=</span> <span class="s">flake8</span>
+
+<span class="k">[versions]</span>
+<span class="na">reportlab</span> <span class="o">=</span> <span class="s">2.7</span>
+<span class="na">anybox.recipe.openerp</span> <span class="o">=</span> <span class="s">1.8.3</span>
+<span class="na">zc.buildout</span> <span class="o">=</span> <span class="s">2.2.1</span>
+<span class="na">pyparsing</span> <span class="o">=</span> <span class="s">1.5.7</span>
+<span class="na">Werkzeug</span> <span class="o">=</span> <span class="s">0.8.3</span>
+<span class="na">lxml</span> <span class="o">=</span> <span class="s">2.3.6</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="12000" id="running-a-buildout">
+<h1>Running a buildout<a class="headerlink" href="#running-a-buildout" title="Permalink to this headline">¶</a></h1>
+<p>The first time:</p>
+<div class="highlight-python"><div class="highlight"><pre>python bootstrap.py
+</pre></div>
+</div>
+<p>Then:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">bin</span><span class="o">/</span><span class="n">buildout</span>
+</pre></div>
+</div>
+<p>Alternatively:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/buildout -c my_config.cfg
+</pre></div>
+</div>
+<p>(demo and description of the outcome)</p>
+</div>
+<div class="step slide section" data-x="13000" id="making-variations">
+<h1>Making variations<a class="headerlink" href="#making-variations" title="Permalink to this headline">¶</a></h1>
+<p>Same project on latest 7.0 bzr branches</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">extends</span> <span class="o">=</span> <span class="s">7_with_addons.cfg</span>
+
+<span class="k">[my_project]</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">bzr lp:openobject-server/7.0 openerp last:1</span>
+<span class="na">addons +</span><span class="o">=</span> <span class="s">bzr lp:openobject-addons/7.0 addons last:1</span>
+<span class="s">          bzr lp:openerp-web/7.0 oerp-web last:1 subdir=addons</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="14000" id="oops-i-forgot">
+<h1>Oops, I forgot<a class="headerlink" href="#oops-i-forgot" title="Permalink to this headline">¶</a></h1>
+<p>Sorry, now it&#8217;s on github !</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">extends</span> <span class="o">=</span> <span class="s">7_with_addons.cfg</span>
+
+<span class="k">[my_project]</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">git http://github.com/odoo/odoo.git odoo 7.0</span>
+<span class="na">addons +</span><span class="o">=</span> <span class="s">local parts/odoo/addons ; should not be needed soon</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="15000" id="more-variation">
+<h1>More variation<a class="headerlink" href="#more-variation" title="Permalink to this headline">¶</a></h1>
+<p>On OpenERP Community Branch with my development version of the recipe</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">extends</span> <span class="o">=</span> <span class="s">7_with_addons.cfg</span>
+<span class="na">develop</span> <span class="o">=</span> <span class="s">/home/gracinet/openerp/recipe/aro-1.8</span>
+
+<span class="k">[my_project]</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">bzr lp:ocb-server/7.0 openerp last:1</span>
+<span class="na">addons</span> <span class="o">=</span> <span class="s">bzr lp:ocb-addons/7.0 addons last:1</span>
+<span class="s">         bzr lp:ocb-web/7.0 oerp-web last:1 subdir=addons</span>
+
+<span class="k">[versions]</span>
+<span class="na">anybox.recipe.openerp</span> <span class="o">=</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="16000" id="smoothing-transitions">
+<h1>Smoothing transitions<a class="headerlink" href="#smoothing-transitions" title="Permalink to this headline">¶</a></h1>
+<p>Does the project work on Odoo ?</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">extends</span> <span class="o">=</span> <span class="s">7_with_addons.cfg</span>
+<span class="na">develop</span> <span class="o">=</span> <span class="s">/home/gracinet/openerp/recipe/aro-1.8</span>
+
+<span class="k">[my_project]</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">git http://github.com/odoo/odoo.git odoo master</span>
+<span class="na">addons +</span><span class="o">=</span> <span class="s">local parts/odoo/addons ; won&#39;t be needed in a few days</span>
+</pre></div>
+</div>
+<p>Demo</p>
+</div>
+<div class="step slide section" data-x="17000" id="a-really-big-project">
+<h1>A really big project<a class="headerlink" href="#a-really-big-project" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">parts</span> <span class="o">=</span> <span class="s">openerp</span>
+
+<span class="k">[openerp]</span>
+<span class="na">recipe</span> <span class="o">=</span> <span class="s">anybox.recipe.openerp[bzr]:server</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">bzr lp:openobject-server/7.0 openerp-server last:1</span>
+<span class="na">addons</span> <span class="o">=</span> <span class="s"></span>
+<span class="s">  bzr lp:openobject-addons/7.0 openerp-addons last:1</span>
+<span class="s">  bzr lp:openerp-web/7.0 openerp-web last:1 subdir=addons</span>
+<span class="s">  bzr lp:~anybox/aeroo/openerp7.0.x aeroo_addons last:1</span>
+<span class="s">  hg https://rhode.anybox.fr/anybox_addons anybox_addons d9d6ce65eb4564c9ce57fa53f5ef497e35b90ac8</span>
+<span class="s">  hg https://rhode.anybox.fr/MLF/analytic_budget analytic_budget decimal</span>
+<span class="s">  hg http://bitbucket.org/anybox/visual_export visual_export default</span>
+<span class="s">  hg http://bitbucket.org/anybox/remove_openerp_export remove_openerp_export default</span>
+<span class="s">  hg http://bitbucket.org/anybox/web_dynatree web_dynatree 7.0</span>
+<span class="s">  hg http://bitbucket.org/anybox/list_multiheader list_multiheader default</span>
+<span class="s">  git http://github.com/0k/web_fullcalendar web_fullcalendar master</span>
+<span class="s">  git http://github.com/0k/web_m2o_enhanced web_m2o_enhanced aa74142cee6cf55e278b3641f989d99fe1e12f15</span>
+<span class="s">  hg http://bitbucket.org/anybox/web_socketio web_socketio default</span>
+<span class="s">  hg http://bitbucket.org/anybox/web_notification web_notification socketio</span>
+<span class="s">  hg http://bitbucket.org/anybox/web_d3_chart web_d3_chart default</span>
+<span class="s">  hg http://bitbucket.org/anybox/advanced_board advanced_board default</span>
+<span class="s">  hg http://bitbucket.org/anybox/widget_color widget_color default</span>
+<span class="s">  hg http://bitbucket.org/anybox/advanced_attachment advanced_attachment default</span>
+<span class="s">  local mlf/</span>
+
+<span class="na">options.load_language</span> <span class="o">=</span> <span class="s">fr_FR</span>
+<span class="na">options.language</span> <span class="o">=</span> <span class="s">fr_FR</span>
+<span class="na">options.server_wide_modules</span> <span class="o">=</span> <span class="s">web,web_kamban,anybox_homepage</span>
+<span class="na">options.homepage_title</span> <span class="o">=</span>
+<span class="na">options.homepage_message</span> <span class="o">=</span>
+<span class="na">options.homepage_logo</span> <span class="o">=</span> <span class="s">mlf/static/src/img/homepage.png</span>
+<span class="na">options.download_package_logo</span> <span class="o">=</span> <span class="s">mlf/static/src/img/homepage.png</span>
+<span class="na">options.download_package_menu_name</span> <span class="o">=</span> <span class="s">À propos de Colibri</span>
+<span class="na">options.download_package_current_version</span> <span class="o">=</span> <span class="s">$VERSION</span>
+
+<span class="na">eggs</span> <span class="o">=</span> <span class="s">coverage</span>
+<span class="s">       nose</span>
+<span class="s">       nose-cprof</span>
+<span class="s">       anybox.testing.openerp</span>
+<span class="s">       odfpy</span>
+<span class="s">       mlf.scripts</span>
+<span class="s">       oe.web.socketio</span>
+<span class="s">       aeroolib</span>
+<span class="s">       sphinx</span>
+
+<span class="na">openerp_scripts</span> <span class="o">=</span> <span class="s">nosetests=nosetests command-line-options=-d</span>
+<span class="s">                  oe_web_socketio=oe_web_socketio</span>
+<span class="s">                  create_colibri=create_colibri arguments=session</span>
+<span class="s">                  import_etablissements=import_etablissements arguments=session</span>
+<span class="s">                  import_users=import_users arguments=session</span>
+<span class="s">                  import_code_philomene=import_code_philomene arguments=session</span>
+<span class="s">                  import_budget=import_budget arguments=session</span>
+<span class="s">                  recompute_apport_cout_compl=recompute_apport_cout_compl arguments=session</span>
+<span class="s">                  sphinx-build=sphinx-build command-line-options=-d</span>
+<span class="s">                  sphinx-apidoc=sphinx-apidoc command-line-options=-d</span>
+
+
+<span class="k">[static-analysis]</span>
+<span class="na">recipe</span> <span class="o">=</span> <span class="s">zc.recipe.egg</span>
+<span class="na">eggs</span> <span class="o">=</span> <span class="s">flake8</span>
+
+<span class="k">[funkload]</span>
+<span class="na">recipe</span> <span class="o">=</span> <span class="s">zc.recipe.egg:scripts</span>
+<span class="na">eggs</span> <span class="o">=</span> <span class="s">anybox.funkload.openerp</span>
+<span class="s">       funkload</span>
+<span class="k">[versions]</span>
+<span class="na">anybox.testing.openerp</span> <span class="o">=</span> <span class="s">1.3.1</span>
+<span class="na">aeroolib</span> <span class="o">=</span> <span class="s">1.2.0</span>
+<span class="na">collective.recipe.sphinxbuilder</span> <span class="o">=</span> <span class="s">0.7.3</span>
+<span class="na">Werkzeug</span> <span class="o">=</span> <span class="s">0.8.3</span>
+<span class="na">flake8</span> <span class="o">=</span> <span class="s">2.0</span>
+<span class="na">pyflakes</span> <span class="o">=</span> <span class="s">0.7.3</span>
+<span class="na">pep8</span> <span class="o">=</span> <span class="s">1.4.6</span>
+<span class="na">mccabe</span> <span class="o">=</span> <span class="s">0.2.1</span>
+<span class="na">gevent-psycopg2</span> <span class="o">=</span> <span class="s">0.0.3</span>
+<span class="na">vobject</span> <span class="o">=</span> <span class="s">0.6.6</span>
+<span class="na">odfpy</span> <span class="o">=</span> <span class="s">0.9.6</span>
+<span class="na">gevent</span> <span class="o">=</span> <span class="s">0.13.8</span>
+<span class="na">pyparsing</span> <span class="o">=</span> <span class="s">1.5.6</span>
+<span class="na">python-ldap</span> <span class="o">=</span> <span class="s">2.4.13</span>
+<span class="na">mako</span> <span class="o">=</span> <span class="s">0.9.0</span>
+<span class="na">pywebdav</span> <span class="o">=</span> <span class="s">0.9.8</span>
+<span class="na">lxml</span> <span class="o">=</span> <span class="s">2.3.3</span>
+<span class="na">eventlet</span> <span class="o">=</span> <span class="s">0.14.0</span>
+<span class="na">psycopg2</span> <span class="o">=</span> <span class="s">2.5.3</span>
+<span class="na">docutils</span> <span class="o">=</span> <span class="s">0.9</span>
+<span class="na">feedparser</span> <span class="o">=</span> <span class="s">5.1.3</span>
+<span class="na">gevent-socketio</span> <span class="o">=</span> <span class="s">0.3</span>
+<span class="na">unittest2</span> <span class="o">=</span> <span class="s">0.5.1</span>
+<span class="na">mock</span> <span class="o">=</span> <span class="s">1.0.1</span>
+<span class="na">xlwt</span> <span class="o">=</span> <span class="s">0.7.5</span>
+<span class="na">gunicorn</span> <span class="o">=</span> <span class="s">18.0</span>
+<span class="na">simplejson</span> <span class="o">=</span> <span class="s">3.3.1</span>
+<span class="na">vatnumber</span> <span class="o">=</span> <span class="s">1.1</span>
+<span class="na">gdata</span> <span class="o">=</span> <span class="s">2.0.18</span>
+<span class="na">markupsafe</span> <span class="o">=</span> <span class="s">0.18</span>
+<span class="na">pytz</span> <span class="o">=</span> <span class="s">2013.7</span>
+<span class="na">jinja2</span> <span class="o">=</span> <span class="s">2.7.1</span>
+<span class="na">coverage</span> <span class="o">=</span> <span class="s">3.7</span>
+<span class="na">reportlab</span> <span class="o">=</span> <span class="s">2.7</span>
+<span class="na">python-dateutil</span> <span class="o">=</span> <span class="s">1.5</span>
+<span class="na">python-openid</span> <span class="o">=</span> <span class="s">2.2.5</span>
+<span class="na">pychart</span> <span class="o">=</span> <span class="s">1.39</span>
+<span class="na">argparse</span> <span class="o">=</span> <span class="s">1.2.1</span>
+<span class="na">pyyaml</span> <span class="o">=</span> <span class="s">3.10</span>
+<span class="na">gevent-websocket</span> <span class="o">=</span> <span class="s">0.3.6</span>
+<span class="na">pydot</span> <span class="o">=</span> <span class="s">1.0.28</span>
+<span class="na">zc.recipe.egg</span> <span class="o">=</span> <span class="s">2.0.1</span>
+<span class="na">psutil</span> <span class="o">=</span> <span class="s">1.1.2</span>
+<span class="na">zc.buildout</span> <span class="o">=</span> <span class="s">2.2.1</span>
+<span class="na">greenlet</span> <span class="o">=</span> <span class="s">0.4.1</span>
+<span class="na">nose</span> <span class="o">=</span> <span class="s">1.3.0</span>
+<span class="na">setuptools</span> <span class="o">=</span> <span class="s">1.1.7</span>
+<span class="na">babel</span> <span class="o">=</span> <span class="s">1.3</span>
+<span class="na">anyjson</span> <span class="o">=</span> <span class="s">0.3.3</span>
+<span class="na">pillow</span> <span class="o">=</span> <span class="s">2.2.1</span>
+
+
+<span class="c1"># this is not inheritable !</span>
+<span class="k">[oe-hg-release]</span>
+<span class="na">set-addons-versions</span> <span class="o">=</span> <span class="s">mlf/*</span>
+<span class="na">set-version-sphinx</span> <span class="o">=</span> <span class="s">doc</span>
+<span class="na">set-version-python-constants</span> <span class="o">=</span> <span class="s">importers/setup.py version:dotted-version-part</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="18000" id="separate-version-pinning">
+<h1>Separate version pinning<a class="headerlink" href="#separate-version-pinning" title="Permalink to this headline">¶</a></h1>
+<p>See later for generation</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">extends</span> <span class="o">=</span> <span class="s">mlf.cfg</span>
+
+<span class="k">[openerp]</span>
+<span class="na">revisions</span> <span class="o">=</span> <span class="s">5112  ; main software part</span>
+<span class="s">	openerp-addons 9548</span>
+<span class="s">	openerp-web 4048</span>
+<span class="s">	analytic_budget dda80161f0d375a71baf3a6c036ef338c71d9b4a</span>
+<span class="s">	visual_export ca8f04518c747b294a08bf5da94443dc5606b45f</span>
+<span class="s">	remove_openerp_export 8b4fee5265681b6925b58c8f08c596aa8870e7af</span>
+<span class="s">	web_dynatree 6315c20229d69e610bdea9bf5c075a0811eadfe3</span>
+<span class="s">	list_multiheader 8f5d41daf80ae5a7e15a546ea0b229d2ae8c358c</span>
+<span class="s">	web_fullcalendar d88809d4e3bf1f35a3fe4cf6ab6804cbad928847</span>
+<span class="s">	web_m2o_enhanced</span>
+<span class="s">	web_socketio ab5971f9650a92220485d0d374ab6c7dbb28b04a</span>
+<span class="s">	web_notification 59c54900950faf909710cdc86081c33bf4619d4e</span>
+
+<span class="k">[versions]</span>
+<span class="na">anybox.testing.openerp</span> <span class="o">=</span> <span class="s">1.3.1</span>
+<span class="na">aeroolib</span> <span class="o">=</span> <span class="s">1.2.0</span>
+<span class="na">collective.recipe.sphinxbuilder</span> <span class="o">=</span> <span class="s">0.7.3</span>
+<span class="na">Werkzeug</span> <span class="o">=</span> <span class="s">0.8.3</span>
+<span class="na">flake8</span> <span class="o">=</span> <span class="s">2.0</span>
+<span class="na">pyflakes</span> <span class="o">=</span> <span class="s">0.7.3</span>
+<span class="na">pep8</span> <span class="o">=</span> <span class="s">1.4.6</span>
+<span class="na">mccabe</span> <span class="o">=</span> <span class="s">0.2.1</span>
+<span class="na">gevent-psycopg2</span> <span class="o">=</span> <span class="s">0.0.3</span>
+<span class="na">vobject</span> <span class="o">=</span> <span class="s">0.6.6</span>
+<span class="na">odfpy</span> <span class="o">=</span> <span class="s">0.9.6</span>
+<span class="na">gevent</span> <span class="o">=</span> <span class="s">0.13.8</span>
+<span class="na">pyparsing</span> <span class="o">=</span> <span class="s">1.5.6</span>
+<span class="na">python-ldap</span> <span class="o">=</span> <span class="s">2.4.13</span>
+<span class="na">mako</span> <span class="o">=</span> <span class="s">0.9.0</span>
+<span class="na">pywebdav</span> <span class="o">=</span> <span class="s">0.9.8</span>
+<span class="na">lxml</span> <span class="o">=</span> <span class="s">2.3.3</span>
+<span class="na">eventlet</span> <span class="o">=</span> <span class="s">0.14.0</span>
+<span class="na">psycopg2</span> <span class="o">=</span> <span class="s">2.5.3</span>
+<span class="na">docutils</span> <span class="o">=</span> <span class="s">0.9</span>
+<span class="na">feedparser</span> <span class="o">=</span> <span class="s">5.1.3</span>
+<span class="na">gevent-socketio</span> <span class="o">=</span> <span class="s">0.3</span>
+<span class="na">unittest2</span> <span class="o">=</span> <span class="s">0.5.1</span>
+<span class="na">mock</span> <span class="o">=</span> <span class="s">1.0.1</span>
+<span class="na">xlwt</span> <span class="o">=</span> <span class="s">0.7.5</span>
+<span class="na">gunicorn</span> <span class="o">=</span> <span class="s">18.0</span>
+<span class="na">simplejson</span> <span class="o">=</span> <span class="s">3.3.1</span>
+<span class="na">vatnumber</span> <span class="o">=</span> <span class="s">1.1</span>
+<span class="na">gdata</span> <span class="o">=</span> <span class="s">2.0.18</span>
+<span class="na">markupsafe</span> <span class="o">=</span> <span class="s">0.18</span>
+<span class="na">pytz</span> <span class="o">=</span> <span class="s">2013.7</span>
+<span class="na">jinja2</span> <span class="o">=</span> <span class="s">2.7.1</span>
+<span class="na">coverage</span> <span class="o">=</span> <span class="s">3.7</span>
+<span class="na">reportlab</span> <span class="o">=</span> <span class="s">2.7</span>
+<span class="na">python-dateutil</span> <span class="o">=</span> <span class="s">1.5</span>
+<span class="na">python-openid</span> <span class="o">=</span> <span class="s">2.2.5</span>
+<span class="na">pychart</span> <span class="o">=</span> <span class="s">1.39</span>
+<span class="na">argparse</span> <span class="o">=</span> <span class="s">1.2.1</span>
+<span class="na">pyyaml</span> <span class="o">=</span> <span class="s">3.10</span>
+<span class="na">gevent-websocket</span> <span class="o">=</span> <span class="s">0.3.6</span>
+<span class="na">pydot</span> <span class="o">=</span> <span class="s">1.0.28</span>
+<span class="na">zc.recipe.egg</span> <span class="o">=</span> <span class="s">2.0.1</span>
+<span class="na">psutil</span> <span class="o">=</span> <span class="s">1.1.2</span>
+<span class="na">zc.buildout</span> <span class="o">=</span> <span class="s">2.2.1</span>
+<span class="na">greenlet</span> <span class="o">=</span> <span class="s">0.4.1</span>
+<span class="na">nose</span> <span class="o">=</span> <span class="s">1.3.0</span>
+<span class="na">setuptools</span> <span class="o">=</span> <span class="s">1.1.7</span>
+<span class="na">babel</span> <span class="o">=</span> <span class="s">1.3</span>
+<span class="na">anyjson</span> <span class="o">=</span> <span class="s">0.3.3</span>
+<span class="na">pillow</span> <span class="o">=</span> <span class="s">2.2.1</span>
+
+
+<span class="c1"># this is not inheritable !</span>
+<span class="k">[oe-hg-release]</span>
+<span class="na">set-addons-versions</span> <span class="o">=</span> <span class="s">mlf/*</span>
+<span class="na">set-version-sphinx</span> <span class="o">=</span> <span class="s">doc</span>
+<span class="na">set-version-python-constants</span> <span class="o">=</span> <span class="s">importers/setup.py version:dotted-version-part</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="19000" id="host-specific-configuration">
+<h1>Host-specific configuration<a class="headerlink" href="#host-specific-configuration" title="Permalink to this headline">¶</a></h1>
+<p>On the testing server :</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[buildout]</span>
+<span class="na">extends</span> <span class="o">=</span> <span class="s">release.cfg</span>
+
+<span class="k">[mlf]</span>
+<span class="na">options.db_user</span> <span class="o">=</span> <span class="s">mlf_test</span>
+<span class="na">options.db_password</span> <span class="o">=</span> <span class="s">False</span>
+<span class="na">gunicorn.workers</span> <span class="o">=</span> <span class="s">4</span>
+<span class="na">gunicorn.bind</span> <span class="o">=</span> <span class="s">0.0.0.0:8169 [::1]:8269</span>
+
+<span class="na">options.admin_passwd</span> <span class="o">=</span> <span class="s">it is not that simple</span>
+<span class="na">options.logfile</span> <span class="o">=</span> <span class="s">../log/openerp-server.log</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="20000" id="anybox-recipe-odoo">
+<h1>anybox.recipe.odoo ?<a class="headerlink" href="#anybox-recipe-odoo" title="Permalink to this headline">¶</a></h1>
+<p>YES</p>
+<ul class="simple">
+<li>works already on Odoo, but Odoo still changes much</li>
+<li>will be a fresh start (drop legacy support)</li>
+<li>will be on github</li>
+<li>in about 2 weeks</li>
+</ul>
+</div>
+<div class="step slide section" data-x="21000" id="part-3-3-advanced-features">
+<h1>Part 3/3: advanced features<a class="headerlink" href="#part-3-3-advanced-features" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="step slide section" data-x="22000" id="advanced-features-overview">
+<h1>Advanced features overview<a class="headerlink" href="#advanced-features-overview" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Scripts<ul>
+<li>written for OpenERP, e.g, batch jobs</li>
+<li>test runners</li>
+<li>instance upgrade &amp; install</li>
+</ul>
+</li>
+<li>Freeze and extraction</li>
+<li>Merges
+brand new feature by S. Rijnhart (Therp)</li>
+</ul>
+</div>
+<div class="step slide section" data-x="23000" id="dedicated-scripts">
+<h1>Dedicated scripts<a class="headerlink" href="#dedicated-scripts" title="Permalink to this headline">¶</a></h1>
+<p>demo: interpreter and session</p>
+<p>in <tt class="docutils literal"><span class="pre">my.script/my/script/main.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+    <span class="n">admin</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">registry</span><span class="p">(</span><span class="s">&#39;res.users&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">browse</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">cr</span><span class="p">,</span>
+                                                 <span class="n">session</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>in <tt class="docutils literal"><span class="pre">my.script/setup.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">entry_points</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+
+<span class="s">[console_scripts]</span>
+<span class="s">my_script = my.script.main:run</span>
+<span class="s">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>in buildout config:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">my_project</span><span class="p">]</span>
+<span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">eggs</span> <span class="o">=</span> <span class="n">my</span><span class="o">.</span><span class="n">script</span>
+<span class="n">openerp_scripts</span> <span class="o">=</span> <span class="n">my_script</span>
+</pre></div>
+</div>
+</div>
+<div class="step slide section" data-x="24000" id="external-script">
+<h1>External script<a class="headerlink" href="#external-script" title="Permalink to this headline">¶</a></h1>
+<p>It works with any script provided by a Python distribution, but some
+require database preloading.
+Main use-case: test runners:</p>
+<div class="highlight-python"><div class="highlight"><pre>[my_project]
+(...)
+eggs = nose
+       coverage
+       nose-cprof
+openerp_scripts = nosetests command-line-options=-d
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/nosetests_myproject -d mydb -- [NOSE REGULAR OPTIONS &amp; ARGUMENTS]
+</pre></div>
+</div>
+<p>Now you can replay failed tests, stop with pdb on error, get profiling
+and coverage info</p>
+</div>
+<div class="step slide section" data-x="25000" id="upgrade-install">
+<h1>Upgrade/install<a class="headerlink" href="#upgrade-install" title="Permalink to this headline">¶</a></h1>
+<p>A special script with <strong>one argument</strong> for uniformity across projects</p>
+<blockquote>
+<div>bin/upgrade_my_project -d mydb</div></blockquote>
+<p>You have total control of what it does:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">run_upgrade</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+    <span class="n">db_version</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">db_version</span>  <span class="c"># state after latest upgrade</span>
+    <span class="k">if</span> <span class="n">db_version</span> <span class="o">&lt;</span> <span class="s">&#39;1.0&#39;</span><span class="p">:</span>
+       <span class="n">session</span><span class="o">.</span><span class="n">update_modules</span><span class="p">([</span><span class="s">&#39;account_account&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+       <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Not upgrading account_account, as we know it &quot;</span>
+                   <span class="s">&quot;to be currently a problem with our setup. &quot;</span><span class="p">)</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">update_modules</span><span class="p">([</span><span class="s">&#39;crm&#39;</span><span class="p">,</span> <span class="s">&#39;sales&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Also can take care initial installations (part of the <tt class="docutils literal"><span class="pre">Session</span></tt> API)</p>
+</div>
+<div class="step slide section" data-x="26000" id="freeze">
+<h1>Freeze<a class="headerlink" href="#freeze" title="Permalink to this headline">¶</a></h1>
+<p>Release or pass what you <strong>have right now</strong> !</p>
+<p>Get an extending buildout configuration that freezes everything:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/buildout --offline my_project:freeze-to=frozen.cfg
+</pre></div>
+</div>
+<p>Designed to be safe by rejecting local modifications</p>
+</div>
+<div class="step slide section" data-x="27000" id="extraction">
+<h1>Extraction<a class="headerlink" href="#extraction" title="Permalink to this headline">¶</a></h1>
+<p>There are so many things that can go wrong or be too slow while
+installing</p>
+<p>A production server should not</p>
+<ul class="simple">
+<li>require access to your private VCS</li>
+<li>rely on launchpad or github availability</li>
+</ul>
+<p>Command similar to freeze, produces a directory with</p>
+<ul class="simple">
+<li>the extracted VCS sources</li>
+<li>the <tt class="docutils literal"><span class="pre">release.cfg</span></tt></li>
+</ul>
+<p>(Example on our buildbot)</p>
+</div>
+<div class="step slide section" data-x="28000" id="merges-and-autocommit">
+<h1>Merges and autocommit<a class="headerlink" href="#merges-and-autocommit" title="Permalink to this headline">¶</a></h1>
+<p>Make a derivative distribution and automerge it:</p>
+<div class="highlight-python"><div class="highlight"><pre>[openerp]
+recipe = anybox.recipe.openerp[bzr]:server
+version = bzr lp:~anybox/ocb-server/7.0-anybox openerp last:1
+addons = bzr lp:~anybox/ocb-addons/7.0-anybox addons/ocb-addons last:1
+         bzr lp:~anybox/ocb-web/7.0-anybox addons/ocb-web last:1 subdir=addons
+
+merges = bzr lp:ocb-server/7.0 parts/openerp last:1
+         bzr lp:ocb-addons/7.0 addons/ocb-addons last:1
+         bzr lp:ocb-web/7.0 addons/ocb-web last:1
+with_autocommit = true
+vcs-revert = on-merge
+</pre></div>
+</div>
+<p>Commit/push is in a separate command:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">bin</span><span class="o">/</span><span class="n">autocommit_openerp</span>
+</pre></div>
+</div>
+<p>Our buildbot commits and pushes iff the tests pass.</p>
+</div>
+<div class="step slide section" data-x="29000" id="thank-you">
+<h1>Thank you !<a class="headerlink" href="#thank-you" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Presentation made with Gawel&#8217;s impress.js Sphinx integration:
+<a class="reference external" href="http://gawel.github.io/impress/">http://gawel.github.io/impress/</a></li>
+</ul>
+<p>Authors: C Combelles, G. Racinet</p>
+<p>External contributors:</p>
+<blockquote>
+<div><ul class="simple">
+<li><ol class="first upperalpha" start="12">
+<li>Mignon, S. Bidoul (Acsone)</li>
+</ol>
+</li>
+<li><ol class="first upperalpha" start="19">
+<li>Rinjhart (Therp)</li>
+</ol>
+</li>
+<li><ol class="first upperalpha" start="25">
+<li>Vaucher, G. Baconnier (Camp2camp)</li>
+</ol>
+</li>
+<li><ol class="first upperalpha" start="12">
+<li>Pistone, J.-E. Baudoux (Bcim)</li>
+</ol>
+</li>
+</ul>
+</div></blockquote>
+</div>
+
+
+    </div>
+    <script src="static/components/impress.js/js/impress.js"></script>
+    <script src="static/jquery.js"></script>
+    <script src="static/impress.js"></script>
+    <script src="static/custom.js"></script>
+    <script>
+      if (! /_modules/.exec(window.location.href)) {
+        impress().init();
+      }
+    </script>
+  </body>
+</html>
