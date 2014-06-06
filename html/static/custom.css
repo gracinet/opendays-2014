@@ -1,1 +1,9 @@
-/* Allow customisation */
+.slide pre {
+  font-size : 75%;
+}
+div.slide {
+background-image: url("anybox.png");
+background-repeat: no-repeat;
+background-position: right bottom;
+}
+
