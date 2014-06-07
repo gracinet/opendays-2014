@@ -229,6 +229,7 @@ demo: interpreter and session
 in ``my.script/my/script/main.py``::
 
   def run(session):
+      session.open()  # DB name taken from etc/openerp.cfg
       admin = session.registry('res.users').browse(session.cr,
                                                    session.uid, 1)
       print(admin.password)
@@ -246,7 +247,7 @@ in buildout config::
   [my_project]
   (...)
   eggs = my.script
-  openerp_scripts = my_script
+  openerp_scripts = my_script arguments=session
 
 
 External script
