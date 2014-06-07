@@ -354,4 +354,5 @@ Thank you !
   * L. Mignon, S. Bidoul (Acsone)
   * S. Rinjhart (Therp)
   * Y. Vaucher, G. Baconnier (Camp2camp)
-  * L. Pistone, J.-E. Baudoux (Bcim)
+  * L. Pistone (AgileBG at the time)
+  * J.-E. Baudoux (Bcim)
